@@ -11,11 +11,10 @@ def load_video_data(args={}):
     names = [str(i)+".jpg" for i in range(62)]
     res = []
     for name in names:
-        pca_folder = r'../../pca/working/perpca/frames/'
-        #pca_folder = r'images_ds/'
-        if not os.path.isfile(pca_folder+r'/car3/'+name):
+        frame_folder = r'data/frames/'
+        if not os.path.isfile(frame_folder+name):
             continue
-        img = Image.open(pca_folder+r'/car3/'+name)
+        img = Image.open(frame_folder+name)
     
         img = np.array(img)
         print(img.shape)
