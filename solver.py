@@ -69,7 +69,7 @@ def l_recovery(truelist, estimate, norm='inf'):
 
 
 
-def heterpgeneous_matrix_factorization(Yin,args,initialization=[],verbose=1):
+def heterogeneous_matrix_factorization(Yin,args,initialization=[],verbose=1):
     
     if isinstance(Yin, list):
         N = len(Yin)
@@ -86,14 +86,14 @@ def heterpgeneous_matrix_factorization(Yin,args,initialization=[],verbose=1):
         (n1,n2dict[y]) = Y[y].shape
         
 
-    if isinstance(args["nlc"], list):
-        nlclst = args["nlc"]
+    if isinstance(args["r2"], list):
+        nlclst = args["r2"]
     else:
-        nlclst = [args["nlc"] for i in range(N)]
+        nlclst = [args["r2"] for i in range(N)]
     if len(initialization) == 0:
-        Ug = {k:Matrix(n1,args["ngc"],device=Y[k].device) for k in alliters}
-        Ug_avg = Matrix(n1,args["ngc"],device=Y[y].device)
-        Vg = {k:Matrix(n2dict[k],args["ngc"],device=Y[k].device) for k in alliters}
+        Ug = {k:Matrix(n1,args["r1"],device=Y[k].device) for k in alliters}
+        Ug_avg = Matrix(n1,args["r1"],device=Y[y].device)
+        Vg = {k:Matrix(n2dict[k],args["r1"],device=Y[k].device) for k in alliters}
         Ul = {k:Matrix(n1,nlclst[k],device=Y[k].device) for k in alliters}
         Vl = {k:Matrix(n2dict[k],nlclst[k],device=Y[k].device) for k in alliters}
     else:
@@ -120,7 +120,7 @@ def heterpgeneous_matrix_factorization(Yin,args,initialization=[],verbose=1):
         for i in alliters:
             #gradient descent step
             pred = Ug[i].lin_mat@Vg[i].lin_mat.T+ Ul[i].lin_mat@Vl[i].lin_mat.T 
-            regi = (torch.sum((Ug[i].lin_mat.T@Ug[i].lin_mat-torch.eye(args["ngc"],device=Y[i].device))**2)+torch.sum((Ul[i].lin_mat.T@Ul[i].lin_mat-torch.eye(nlclst[i],device=Y[i].device))**2))
+            regi = (torch.sum((Ug[i].lin_mat.T@Ug[i].lin_mat-torch.eye(args["r1"],device=Y[i].device))**2)+torch.sum((Ul[i].lin_mat.T@Ul[i].lin_mat-torch.eye(nlclst[i],device=Y[i].device))**2))
             
             lossi = torch.sum((pred-Y[i])**2)+args["beta"]*regi#print(n1,n2dict[i]))**2)+torch.sum(()**2))
             optim[i].zero_grad()
