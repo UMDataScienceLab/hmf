@@ -1,14 +1,10 @@
-#basic libary
-import copy
 import random
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
 import torch.nn as nn
-import torch.optim as optim
 
 from solver import *
-#from plotting import *
 
 class Experiment():
  
