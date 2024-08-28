@@ -5,12 +5,12 @@ This repository contains the implementation of the paper *Heterogeneous Matrix F
 
 # Files
 
-solver.py implements the algorithm heterogeneous_matrix_factorization. main.py provides a few examples that call this function. For instance, running
+solver.py implements the algorithm heterogeneous_matrix_factorization and heterogeneous_matrix_completion. main.py provides a few examples that call this function. For instance, running
 
 ```
 python3 main.py --dataset=synthetic --logoutput=True
 ```
-will apply hmf on the synthetic example in Section 6.1.
+will apply hmf on the synthetic example.
 
 torchimgpro.py, emailprocess.py, stockprocess.py are used for loading and preprocessing the video frames, email communication networks, and stock prices.
 

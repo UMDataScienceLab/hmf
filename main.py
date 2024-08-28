@@ -83,7 +83,119 @@ class Experiment():
         args["local_recovery_error"] = lambda x: l_recovery([Ugt,vgst,ulst,vlst],x,'f')
 
         Ug,Vg,Ul,Vl = heterogeneous_matrix_factorization(Y,args,verbose=20)
-   
+    
+    def matrix_completion_example(inputargs):
+        args = {
+            "ngc":3,
+            "nlc":3,
+            "optim":"SGD",
+            "lr":0.01,
+            "epochs":1000,
+            "beta":1e-100,
+            "seed":100,
+          
+            "rho":0.99,
+            "wd":0,
+            #"epsilon":1e-8,
+            "normalize_inner_loop":0, 
+            "patience":100000,  
+            "threshold_epoch":100000,
+            "verbose":2,   
+            "print_norm":1,
+            "device": 'cuda'    
+        }
+        print(args)
+        d = 120
+        ndt = 100
+        N = 10
+        p = 0.1
+        device = "cuda"
+
+        Ugt = torch.zeros(d,args["ngc"]).to(device)
+        for i in range(args["ngc"]):
+            Ugt[i,i]=1#0
+
+        Q, R = torch.linalg.qr(torch.randn(d,d))    
+        Q = Q.to(device)
+        Ult = torch.zeros(N, d, args["nlc"]).to(device)
+        ter_id = 119
+        ini_id = 5
+        for clid in range(N):
+            for cpid in range(args["nlc"]):
+                Ult[clid, ((cpid + clid) % (ter_id - ini_id + 1) + ini_id), cpid] = 1
+                # res[clid, cpid, (cpid)%(ter_id-ini_id+1)+ini_id] = 1
+        with torch.no_grad():
+            Ugt = Q@Ugt
+            for i in range(N):
+                Ult[i,:,:] = Q@Ult[i,:,:]
+        import torch.nn.functional as F
+        pavg = sum(Ult[i,:,:]@Ult[i,:,:].T for i in range(N))/N
+        up,sp,vhp = torch.linalg.svd(pavg)
+        #print(sp)
+        print("theta is %.6f"%(1-sp[0]))
+        #return
+        
+        Y = []
+        Ymask = []
+        ulst = []
+        vgst = []
+        vlst = []
+        for i in range(N):
+            Vgt = torch.randn(ndt,args["ngc"]).to(device)#*100
+            Qvg,R = torch.linalg.qr(Vgt)
+            Vgt = Qvg
+            #Ult = torch.randn(d,args["nlc"])
+            Ult[i,:,:] -= Ugt @ torch.inverse(Ugt.T@Ugt) @ Ugt.T @ Ult[i,:,:]
+            #Ult = F.normalize(Ult, p=2, dim=1)
+            ulst.append(Ult[i,:,:])
+            #print(Ult[i,:,:])
+            Vlt = torch.randn(ndt,args["nlc"]).to(device)#*100
+            Vlt -= Vgt @ torch.inverse(Vgt.T@Vgt) @ Vgt.T@Vlt
+            Qvl,R = torch.linalg.qr(Vlt)
+            Vlt = Qvl
+            
+            ygpart = Ugt@Vgt.T
+            
+
+            yipart = Ult[i,:,:]@Vlt.T
+            
+            (n1,n2) = ygpart.shape
+            supporti = np.random.choice(2, n1*n2, p=[p,1-p])
+            supporti = torch.abs(torch.tensor(np.reshape(supporti,(n1,n2)))).to(device)
+            
+            yi = (supporti*(ygpart+yipart))#.to_sparse_coo()
+            #print(yi)
+            Y.append(yi)
+            Ymask.append(supporti)
+            vgst.append(Vgt)
+            vlst.append(Vlt)
+       
+        args["global_subspace_err_metric"]= lambda x: subspace_error(Ugt,x)**2
+        args["local_subspace_err_metric"] = lambda x: sum([subspace_error(ulst[i],x[i])**2 for i in range(N)])/N
+        
+      
+        print("--------------------------------------")
+        print("HMF")
+        args['n1'] = n1
+        args['n2'] = n2
+        Ug,Vg,Ul,Vl = heterogeneous_matrix_completion(Y,Ymask,args)
+        return
+        
+        print("--------------------------------------")
+        print("perpca")
+        args["lr"] = 0.1 
+        Ug,Ul = perpca(Y,args)
+        args["mu"] = 100
+        args["lbd"] = 0.01
+        print("--------------------------------------")
+        print("JIVE")
+        
+        J,A = jive(Y, args)
+
+        print("--------------------------------------")
+        print("RJIVE")
+        J,A = robust_jive(Y, args)
+ 
     def video(inputargs):
         args = {
             "r1":20,
