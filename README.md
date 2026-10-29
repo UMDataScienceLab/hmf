@@ -1,6 +1,8 @@
 # Implementation of the paper *Heterogeneous Matrix Factorization: When Features Differ by Datasets*
 
-This repository contains the implementation of the paper *Heterogeneous Matrix Factorization: When Features Differ by Datasets*. 
+This repository contains the implementation of the paper *Heterogeneous Matrix Factorization: When Features Differ by Datasets*.
+
+We propose heterogeneous matrix factorization (HMF) to recover the factors shared across related but heterogeneous datasets and the factors *unique* to each one.
 
 
 # Files
@@ -29,4 +31,19 @@ The email network data are downloaded from [Stanford Large Network Dataset Colle
 To run the experiment on temporal graph feature extraction, firstly download the email communication record from the SLNP dataset, next extract the txt file. Then change line 14 of emailprocess.py to the folder that contains txt file. Finally, run
 ```
 python3 main.py --dataset=email --logoutput=True
+```
+
+## Citation
+
+[Paper](https://openreview.net/forum?id=1BUB0I3Obx) (Transactions on Machine Learning Research, 2026). If you use this code, please cite:
+
+```bibtex
+@article{shi2026heterogeneous,
+  title={Heterogeneous Matrix Factorization: When Features Differ by Datasets},
+  author={Shi, Naichen and Fattahi, Salar and Al Kontar, Raed},
+  journal={Transactions on Machine Learning Research},
+  issn={2835-8856},
+  year={2026},
+  url={https://openreview.net/forum?id=1BUB0I3Obx}
+}
 ```
